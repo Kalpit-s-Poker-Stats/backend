@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: backend-api:latest
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    volumes:
+      - /home/ubuntu/images:/code/images:rw
