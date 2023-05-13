@@ -14,8 +14,8 @@ from api.database.models import (
 
 router = APIRouter()
 
-@router.get("/hello", tags=["account"])
-async def hello() -> json:
+@router.get("/full_table", tags=["account"])
+async def full_table() -> json:
     sql = select(PokerStats)
     async with USERDATA_ENGINE.get_session() as session:
             session: AsyncSession = session
@@ -24,7 +24,11 @@ async def hello() -> json:
 
     data = sqlalchemy_result(data)
     data = data.rows2dict()
-    return data
+    response = dict()
+    for value in data:
+        idx = value['id']
+        response[idx] = value
+    return response
 
 @router.post("/entry")
 async def entry(name, winnings):
