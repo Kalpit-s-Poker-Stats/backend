@@ -1,0 +1,15 @@
+{"ts": "2023-05-13 00:05:45,811", "name": "api.middleware", "function": "add_process_time_header", "level": "DEBUG", "msg": "\"{'url': 'http://127.0.0.1:8000/', 'process_time': 0.0}\""}
+{"ts": "2023-05-13 00:05:46,323", "name": "api.middleware", "function": "add_process_time_header", "level": "DEBUG", "msg": "\"{'url': 'http://127.0.0.1:8000/favicon.ico', 'process_time': 0.0}\""}
+{"ts": "2023-05-13 00:05:55,047", "name": "api.middleware", "function": "add_process_time_header", "level": "DEBUG", "msg": "\"{'url': 'http://127.0.0.1:8000/docs', 'process_time': 0.0}\""}
+{"ts": "2023-05-13 00:05:55,274", "name": "api.middleware", "function": "add_process_time_header", "level": "DEBUG", "msg": "\"{'url': 'http://127.0.0.1:8000/openapi.json', 'process_time': 0.0009999275207519531}\""}
+{"ts": "2023-05-13 00:06:02,827", "name": "api.middleware", "function": "add_process_time_header", "level": "DEBUG", "msg": "\"{'url': 'http://127.0.0.1:8000/v1/account/hello', 'process_time': 0.0}\""}
+{"ts": "2023-05-13 00:14:48,573", "name": "api.middleware", "function": "add_process_time_header", "level": "DEBUG", "msg": "\"{'url': 'http://127.0.0.1:8000/hello', 'process_time': 0.0}\""}
+{"ts": "2023-05-13 00:15:51,527", "name": "api.middleware", "function": "add_process_time_header", "level": "DEBUG", "msg": "\"{'url': 'http://127.0.0.1:8000/v1/account/hello', 'process_time': 0.5037007331848145}\""}
+{"ts": "2023-05-13 00:17:23,808", "name": "api.middleware", "function": "add_process_time_header", "level": "DEBUG", "msg": "\"{'url': 'http://127.0.0.1:8000/v1/account/hello', 'process_time': 0.14287543296813965}\""}
+{"ts": "2023-05-13 00:19:24,377", "name": "api.middleware", "function": "add_process_time_header", "level": "DEBUG", "msg": "\"{'url': 'http://127.0.0.1:8000/docs', 'process_time': 0.0}\""}
+{"ts": "2023-05-13 00:19:24,773", "name": "api.middleware", "function": "add_process_time_header", "level": "DEBUG", "msg": "\"{'url': 'http://127.0.0.1:8000/openapi.json', 'process_time': 0.002642393112182617}\""}
+{"ts": "2023-05-13 00:19:33,533", "name": "api.middleware", "function": "add_process_time_header", "level": "DEBUG", "msg": "\"{'url': 'http://127.0.0.1:8000/v1/account/hello?amount=0', 'process_time': 0.5021777153015137}\""}
+{"ts": "2023-05-13 00:19:36,957", "name": "api.middleware", "function": "add_process_time_header", "level": "DEBUG", "msg": "\"{'url': 'http://127.0.0.1:8000/v1/account/hello?amount=100', 'process_time': 0.14099621772766113}\""}
+{"ts": "2023-05-13 00:22:30,709", "name": "api.middleware", "function": "add_process_time_header", "level": "DEBUG", "msg": "\"{'url': 'http://127.0.0.1:8000/docs', 'process_time': 0.001003265380859375}\""}
+{"ts": "2023-05-13 00:22:31,000", "name": "api.middleware", "function": "add_process_time_header", "level": "DEBUG", "msg": "\"{'url': 'http://127.0.0.1:8000/openapi.json', 'process_time': 0.0030012130737304688}\""}
+{"ts": "2023-05-13 00:22:40,517", "name": "api.middleware", "function": "add_process_time_header", "level": "DEBUG", "msg": "\"{'url': 'http://127.0.0.1:8000/v1/account/entry?name=Tester2&winnings=20', 'process_time': 0.512382984161377}\""}
