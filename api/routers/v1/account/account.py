@@ -33,3 +33,4 @@ async def entry(name, winnings):
             session: AsyncSession = session
             async with session.begin():
                 await session.execute(sql)
+    raise HTTPException(status_code = status.HTTP_201_CREATED, detail = "Account Added")
