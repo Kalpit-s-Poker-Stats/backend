@@ -1,0 +1,56 @@
+Database:
+
+    - Table 1: Profile
+        - id: INTEGER
+        - name: TINYTEXT
+        - biggestWin: INTEGER
+        - worstLoss: INTEGER
+        - dateOfBiggestWin: DATE
+        - dateOfWorstLoss: DATE
+        - averageAllTimeWinOrLoss: INTEGER
+        - positivePercentage: INTEGER
+        - negativePercentage: INTEGER
+        - numberOfSessionsPositive: INTEGER
+        - numberOfSessionsNegative: INTEGER
+        - totalSessionsPlayed: INTEGER
+
+    - Table 2: Session
+        - id: INTEGER
+        - winnings: INTEGER
+        - buyInAmount: INTEGER
+        - buyOutAmount: INTEGER
+        - location: TINYTEXT (online, IRL, casino)
+
+
+Endpoints needed:
+
+    1. get: user_stats(id, stat)
+        - where stat is a string of a column in the table
+    2. post: session_entry(name, winnings, buyInAmount, buyOutAmount, location) -
+        - update biggestWin and worstLoss if needed
+        - dateOfBiggestWin and dateOfWorstLoss if needed
+        - update averageAllTimeWinOrLoss
+        - update positivePercentage
+        - update negativePercentage
+        - update numberOfSessionsNegative
+        - update numberOfSessionsPositive
+        - update totalSessionsPlayedh
+    3. get: session_info_by_user(id, timeFrame!) - 
+        - queries session table to get all session information by user id
+    4. 
+
+
+
+
+Functions/Components Needed:
+
+Front End Component:
+
+    User Service:
+        - calls get user_stats endpoint and gains specific data
+        - will save user context into a global user object until the user clicks on search again
+        - on search again, we will clear the user object
+
+    Session Info Service:
+        - calls get session_info_by_user endpoint and gains all data assocaited with a specific id
+        - return the object to the calling component

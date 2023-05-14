@@ -9,14 +9,15 @@ from api.database.database import USERDATA_ENGINE
 from api.database.functions import sqlalchemy_result
 
 from api.database.models import (
-    PokerStats
+    Session
 )
 
 router = APIRouter()
 
-@router.get("/full_table", tags=["account"])
-async def full_table() -> json:
-    sql = select(PokerStats)
+
+@router.get("/full_session_table")
+async def full_session_table() -> json:
+    sql = select(Session).where()
     async with USERDATA_ENGINE.get_session() as session:
             session: AsyncSession = session
             async with session.begin():
@@ -28,13 +29,17 @@ async def full_table() -> json:
     for value in data:
         idx = value['id']
         response[idx] = value
+   
     return response
 
+
 @router.post("/entry")
-async def entry(name, winnings):
-    sql = insert(PokerStats).values(name = name, winnings = winnings)
+async def entry(id, winnings, buy_in_amount, buy_out_amount, location):
+    sql = insert(Session).values(id = id, winnings = winnings, buy_in_amount = buy_in_amount, buy_out_amount = buy_out_amount, location = location)
     async with USERDATA_ENGINE.get_session() as session:
             session: AsyncSession = session
             async with session.begin():
                 await session.execute(sql)
     raise HTTPException(status_code = status.HTTP_201_CREATED, detail = "Account Added")
+
+

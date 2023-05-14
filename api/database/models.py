@@ -29,12 +29,35 @@ metadata = Base.metadata
 #     timestamp_edited = Column(TIMESTAMP)
 
 
-class PokerStats(Base):
-    __tablename__ = "poker_stats"
+class Profile(Base):
+    __tablename__ = "profile"
+
+    id = Column(INTEGER, primary_key=True, autoincrement=True)
+    name = Column(TINYTEXT)
+    biggest_win = Column(INTEGER)
+    biggest_loss = Column(INTEGER)
+    date_of_biggest_win = Column(
+        TIMESTAMP,
+    )
+    date_of_biggest_loss = Column(
+        TIMESTAMP,
+    )
+    average_all_time_win_or_loss = Column(INTEGER)
+    positive_percentage = Column(INTEGER)
+    negative_percentage = Column(INTEGER)
+    number_of_sessions_positive = Column(INTEGER)
+    number_of_sessions_negative = Column(INTEGER)
+    total_sessions_played = Column(INTEGER)
+
+
+class Session(Base):
+    __tablename__ = "session"
 
     id = Column(INTEGER, primary_key=True)
-    name = Column(TINYTEXT)
     winnings = Column(INTEGER)
-    date_played = Column(
-        TIMESTAMP,
+    buy_in_amount = Column(INTEGER)
+    buy_out_amount = Column(INTEGER)
+    location = Column(TINYTEXT)
+    date = Column(
+        TIMESTAMP
     )
