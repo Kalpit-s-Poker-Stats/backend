@@ -1,4 +1,4 @@
-from sqlalchemy import DECIMAL, INTEGER, TIMESTAMP, VARCHAR, Column, ForeignKey, FLOAT
+from sqlalchemy import DECIMAL, INTEGER, TIMESTAMP, VARCHAR, Column, ForeignKey, FLOAT, DATE
 from sqlalchemy.dialects.mysql import TEXT, TINYINT, VARCHAR
 from sqlalchemy.dialects.mysql.types import TINYTEXT
 from sqlalchemy.ext.declarative import declarative_base
@@ -36,12 +36,8 @@ class Profile(Base):
     name = Column(TINYTEXT)
     biggest_win = Column(INTEGER)
     biggest_loss = Column(INTEGER)
-    date_of_biggest_win = Column(
-        TIMESTAMP,
-    )
-    date_of_biggest_loss = Column(
-        TIMESTAMP,
-    )
+    date_of_biggest_win = Column(DATE)
+    date_of_biggest_loss = Column(DATE)
     average_all_time_win_or_loss = Column(INTEGER)
     positive_percentage = Column(INTEGER)
     negative_percentage = Column(INTEGER)
@@ -58,6 +54,4 @@ class Session(Base):
     buy_in_amount = Column(INTEGER)
     buy_out_amount = Column(INTEGER)
     location = Column(TINYTEXT)
-    date = Column(
-        TIMESTAMP
-    )
+    date = Column(DATE)

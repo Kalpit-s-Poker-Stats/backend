@@ -34,8 +34,8 @@ async def full_session_table() -> json:
 
 
 @router.post("/entry")
-async def entry(id, winnings, buy_in_amount, buy_out_amount, location):
-    sql = insert(Session).values(id = id, winnings = winnings, buy_in_amount = buy_in_amount, buy_out_amount = buy_out_amount, location = location)
+async def entry(id, winnings, buy_in_amount, buy_out_amount, location, date):
+    sql = insert(Session).values(id = id, winnings = winnings, buy_in_amount = buy_in_amount, buy_out_amount = buy_out_amount, location = location, date = date)
     async with USERDATA_ENGINE.get_session() as session:
             session: AsyncSession = session
             async with session.begin():
