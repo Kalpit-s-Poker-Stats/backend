@@ -15,8 +15,17 @@ from api.database.models import (
 router = APIRouter()
 
 @router.get("/full_table")
-async def full_table() -> json:
-    sql = select(Profile).where()
+async def full_table(id) -> json:
+    data = await get_user_info(id)
+
+    response = dict()
+    response[0] = data
+   
+    return response
+
+
+async def get_user_info(id):
+    sql = select(Profile).where(id == id)
     async with USERDATA_ENGINE.get_session() as session:
             session: AsyncSession = session
             async with session.begin():
@@ -24,9 +33,6 @@ async def full_table() -> json:
 
     data = sqlalchemy_result(data)
     data = data.rows2dict()
-    response = dict()
-    for value in data:
-        idx = value['id']
-        response[idx] = value
-   
-    return response
+    if len(data) == 0:
+        raise HTTPException(detail = "Profile not found")
+    return data
