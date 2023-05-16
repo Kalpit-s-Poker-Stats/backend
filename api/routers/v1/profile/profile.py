@@ -25,7 +25,7 @@ async def full_table(id) -> json:
 
 
 async def get_user_info(id):
-    sql = select(Profile).where(id == id)
+    sql = select(Profile).where(Profile.id == id)
     async with USERDATA_ENGINE.get_session() as session:
             session: AsyncSession = session
             async with session.begin():
