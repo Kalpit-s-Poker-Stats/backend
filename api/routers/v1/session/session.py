@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.expression import select, insert, delete, update
+from pydantic import BaseModel
 
 from api.database.database import USERDATA_ENGINE
 from api.database.functions import sqlalchemy_result
@@ -14,8 +15,17 @@ from api.database.models import (
 )
 
 from api.routers.v1.profile import profile
+import datetime
 
 router = APIRouter()
+
+class SessionEntry(BaseModel):
+    id: int
+    winnings: float
+    buy_in_amount: float
+    buy_out_amount: float
+    location: str
+    date: str
 
 
 @router.get("/full_session_table")
@@ -37,16 +47,16 @@ async def full_session_table() -> json:
 
 
 @router.post("/entry")
-async def entry(id, winnings, buy_in_amount, buy_out_amount, location, date):
-    sql = insert(Session).values(id = id, winnings = winnings, buy_in_amount = buy_in_amount, buy_out_amount = buy_out_amount, location = location, date = date)
-    current_profile = await update_user_stats(id, winnings, date)
+async def entry(session_entry: SessionEntry):
+    sql = insert(Session).values(id = session_entry.id, winnings = session_entry.winnings, buy_in_amount = session_entry.buy_in_amount, buy_out_amount = session_entry.buy_out_amount, location = session_entry.location, date = session_entry.date)
+    current_profile = await update_user_stats(session_entry.id, session_entry.winnings, session_entry.date)
 
 
     async with USERDATA_ENGINE.get_session() as session:
             session: AsyncSession = session
             async with session.begin():
                 await session.execute(sql)
-    raise HTTPException(status_code = status.HTTP_201_CREATED, detail = "Account Added")
+    raise HTTPException(status_code = status.HTTP_201_CREATED, detail = "Session Added for id = " + str(session_entry.id))
 
 
 
