@@ -54,3 +54,7 @@ Front End Component:
     Session Info Service:
         - calls get session_info_by_user endpoint and gains all data assocaited with a specific id
         - return the object to the calling component
+
+
+        Auric w
+       
