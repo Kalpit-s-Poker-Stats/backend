@@ -1,4 +1,5 @@
 import json
+from datetime import date
 
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
@@ -57,6 +58,19 @@ async def entry(session_entry: SessionEntry):
             async with session.begin():
                 await session.execute(sql)
     raise HTTPException(status_code = status.HTTP_201_CREATED, detail = "Session Added for id = " + str(session_entry.id))
+
+@router.get("/user_data")
+async def user_data(id, beg_date, end_date) -> json:
+    current_date = date.today()
+    sql = select(Session).where(Session.id == id and Session.date >= beg_date and Session.date <= end_date)
+    async with USERDATA_ENGINE.get_session() as session:
+            session: AsyncSession = session
+            async with session.begin():
+                data = await session.execute(sql)
+    data = sqlalchemy_result(data)
+    data = data.rows2dict()
+
+    return data
 
 
 
