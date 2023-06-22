@@ -50,7 +50,8 @@ class Profile(Base):
 class Session(Base):
     __tablename__ = "session"
 
-    id = Column(INTEGER, primary_key=True)
+    entry_number = Column(INTEGER, primary_key=True)
+    id = Column(INTEGER)
     winnings = Column(FLOAT)
     buy_in_amount = Column(FLOAT)
     buy_out_amount = Column(FLOAT)

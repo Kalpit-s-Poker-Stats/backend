@@ -17,6 +17,8 @@ from api.database.models import (
 
 from api.routers.v1.profile import profile
 import datetime
+from datetime import datetime
+
 
 router = APIRouter()
 

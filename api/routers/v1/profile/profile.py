@@ -14,7 +14,7 @@ from api.database.models import (
 
 router = APIRouter()
 
-@router.get("/full_table")
+@router.get("/get_user_data")
 async def full_table(id) -> json:
     data = await get_user_info(id)
 
