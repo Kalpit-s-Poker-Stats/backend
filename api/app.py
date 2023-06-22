@@ -13,5 +13,5 @@ app.include_router(v1.router)
 @app.get("/")
 async def root():
     return {
-        "message": "Welcome to the Workout with Me API. If you're interested in becoming a developer, please contact ferrariictweet@gmail.com!"
+        "message": "BFF for a Poker Winnings Tracker"
     }
