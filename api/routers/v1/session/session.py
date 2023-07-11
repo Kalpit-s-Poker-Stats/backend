@@ -18,6 +18,7 @@ from api.database.models import (
 from api.routers.v1.profile import profile
 import datetime
 from datetime import datetime
+from typing import Union
 
 
 router = APIRouter()
@@ -62,9 +63,13 @@ async def entry(session_entry: SessionEntry):
     raise HTTPException(status_code = status.HTTP_201_CREATED, detail = "Session Added for id = " + str(session_entry.id))
 
 @router.get("/user_data")
-async def user_data(id, beg_date, end_date) -> json:
+async def user_data(id, beg_date: Union[str, None] = None, end_date: Union[str, None] = None) -> json:
     current_date = date.today()
-    sql = select(Session).where(Session.id == id).filter(Session.date >= beg_date, Session.date <= end_date)
+    sql = select(Session).where(Session.id == id)
+    if(beg_date):
+        sql = sql.filter(Session.date >= beg_date)
+    if(end_date):
+        sql = sql.filter(Session.date <= end_date)
     async with USERDATA_ENGINE.get_session() as session:
             session: AsyncSession = session
             async with session.begin():
