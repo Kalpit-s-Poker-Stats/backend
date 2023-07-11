@@ -64,7 +64,7 @@ async def entry(session_entry: SessionEntry):
 @router.get("/user_data")
 async def user_data(id, beg_date, end_date) -> json:
     current_date = date.today()
-    sql = select(Session).where(Session.id == id and Session.date >= beg_date and Session.date <= end_date)
+    sql = select(Session).where(Session.id == id).filter(Session.date >= beg_date, Session.date <= end_date)
     async with USERDATA_ENGINE.get_session() as session:
             session: AsyncSession = session
             async with session.begin():
