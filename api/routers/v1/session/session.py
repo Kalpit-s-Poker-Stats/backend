@@ -66,6 +66,7 @@ async def entry(session_entry: SessionEntry):
 async def user_data(id, beg_date: Union[str, None] = None, end_date: Union[str, None] = None) -> json:
     current_date = date.today()
     sql = select(Session).where(Session.id == id)
+    sql2 = select(Profile).where(Profile.id == id)
     if(beg_date):
         sql = sql.filter(Session.date >= beg_date)
     if(end_date):
@@ -74,8 +75,13 @@ async def user_data(id, beg_date: Union[str, None] = None, end_date: Union[str, 
             session: AsyncSession = session
             async with session.begin():
                 data = await session.execute(sql)
+                data2 = await session.execute(sql2)
     data = sqlalchemy_result(data)
     data = data.rows2dict()
+    data2 = sqlalchemy_result(data2)
+    data2 = data2.rows2dict()
+    data += data2
+
 
     return data
 
