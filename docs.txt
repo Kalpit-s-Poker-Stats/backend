@@ -34,7 +34,7 @@ Endpoints needed:
         - update negativePercentage
         - update numberOfSessionsNegative
         - update numberOfSessionsPositive
-        - update totalSessionsPlayedh
+        - update totalSessionsPlayed
     3. get: session_info_by_user(id, timeFrame!) - 
         - queries session table to get all session information by user id
     4. 
@@ -56,5 +56,17 @@ Front End Component:
         - return the object to the calling component
 
 
-        Auric w
-       
+
+    
+    enum timeFrames = {
+        1 year,
+        1 week,
+        2 weeks,
+        1 day
+    }
+
+
+    1 week ->
+
+    Session.date > beg_date
+    AND Session.date < end_date
