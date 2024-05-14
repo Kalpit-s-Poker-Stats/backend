@@ -19,7 +19,7 @@ from api.routers.v1.profile import profile
 import datetime
 from datetime import datetime
 from typing import Union
-
+import pandas as pd
 
 router = APIRouter()
 
@@ -84,6 +84,37 @@ async def user_data(id, beg_date: Union[str, None] = None, end_date: Union[str, 
 
 
     return data
+
+
+@router.get("/bulk_upload_tester")
+async def bulk_upload_tester() -> json: 
+    df = pd.read_excel('tester.xlsx')
+
+    # Initialize variables
+    table_data = []
+    header_row = None
+    table_started = False
+
+    # Iterate over rows
+    for index, row in df.iterrows():
+        # Check if the row starts a new table
+        if row.notnull().all() and not table_started:
+            table_started = True
+            header_row = row
+        # Check if the row is empty, indicating the end of a table
+        elif not row.notnull().any() and table_started:
+            table_started = False
+            # Process table data
+            data = []
+            for i in range(1, len(header_row), 2):
+                user = header_row[i]
+                print("user: " + user)
+                date = row[i]
+                print("date: " + date)
+                amount = row[i+1]
+                print("amount: " + amount)
+                data.append({'user': user, 'date': date, 'amount': amount})
+            table_data.extend(data)
 
 
 
