@@ -92,7 +92,7 @@ async def entry(session_entry: SessionEntry):
 async def user_data(id, beg_date: Union[str, None] = None, end_date: Union[str, None] = None) -> json:
     current_date = date.today()
     sql = select(Session).where(Session.id == id)
-    sql2 = select(Profile).where(Profile.id == id)
+    sql2 = select(Profile).where(Profile.pn_id == id)
     if(beg_date):
         sql = sql.filter(Session.date >= beg_date)
     if(end_date):
@@ -188,7 +188,7 @@ async def update_user_stats(id, winnings, date):
         positive_percentage = (current_profile[0].get('number_of_sessions_positive') / total_sessions_played) * 100
         number_of_sessions_positive = current_profile[0].get('number_of_sessions_positive')
     
-    sql = update(Profile).values(all_time_total = all_time_total, biggest_win = biggest_win, biggest_loss = biggest_loss, date_of_biggest_win = date_of_biggest_win, date_of_biggest_loss = date_of_biggest_loss, average_all_time_win_or_loss = average_all_time_win_or_loss, positive_percentage = positive_percentage, negative_percentage = negative_percentage, number_of_sessions_positive = number_of_sessions_positive, number_of_sessions_negative = number_of_sessions_negative, total_sessions_played = total_sessions_played).where(Profile.id == id)
+    sql = update(Profile).values(all_time_total = all_time_total, biggest_win = biggest_win, biggest_loss = biggest_loss, date_of_biggest_win = date_of_biggest_win, date_of_biggest_loss = date_of_biggest_loss, average_all_time_win_or_loss = average_all_time_win_or_loss, positive_percentage = positive_percentage, negative_percentage = negative_percentage, number_of_sessions_positive = number_of_sessions_positive, number_of_sessions_negative = number_of_sessions_negative, total_sessions_played = total_sessions_played).where(Profile.pn_id == id)
     async with USERDATA_ENGINE.get_session() as session:
             session: AsyncSession = session
             async with session.begin():
