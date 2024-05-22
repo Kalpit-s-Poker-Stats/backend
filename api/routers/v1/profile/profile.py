@@ -39,6 +39,7 @@ async def get_user_info(id):
         raise HTTPException(detail = "Profile not found")
     return data
 
+# TODO: update query to add in values for the updated columns in profile table
 @router.put("/reset_user_stats")
 async def reset_user_stats(id):
     default_date = "0000-00-00"
