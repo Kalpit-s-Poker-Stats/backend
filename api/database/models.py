@@ -33,7 +33,8 @@ class Profile(Base):
     __tablename__ = "profile"
 
     google_client_id = Column(VARCHAR(256))
-    pn_id = Column(TINYTEXT, primary_key=True)
+    pn_id = Column(VARCHAR(256), primary_key=True)
+    splitwise_id = Column(INTEGER)
     name = Column(TINYTEXT)
     all_time_total = Column(FLOAT)
     biggest_win = Column(FLOAT)
@@ -64,4 +65,3 @@ class Leaderboard(Base):
     __tablename__ = ""
 
     pn_id = Column(TINYTEXT, primary_key=True)
-    
