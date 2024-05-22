@@ -10,6 +10,10 @@ from pydantic import BaseModel
 from api.database.database import USERDATA_ENGINE
 from api.database.functions import sqlalchemy_result
 
+from pydantic import BaseModel
+
+from api.models import LedgerModel
+
 from api.database.models import (
     Session,
     Profile
@@ -21,7 +25,29 @@ from datetime import datetime
 from typing import Union
 import pandas as pd
 
+import http.client
+from api import config
+import http.server
+from urllib.parse import urlparse, parse_qs
+from datetime import datetime
+from typing import List, Optional
+
+
+import logging
+
 router = APIRouter()
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+class PlayerData(BaseModel):
+    player_nickname: str
+    player_id: str
+    session_start_at: Optional[datetime] = None
+    session_end_at: Optional[datetime] = None
+    buy_in: Optional[float] = None
+    stack: float
+    net: float
 
 class SessionEntry(BaseModel):
     id: int
@@ -66,7 +92,7 @@ async def entry(session_entry: SessionEntry):
 async def user_data(id, beg_date: Union[str, None] = None, end_date: Union[str, None] = None) -> json:
     current_date = date.today()
     sql = select(Session).where(Session.id == id)
-    sql2 = select(Profile).where(Profile.id == id)
+    sql2 = select(Profile).where(Profile.pn_id == id)
     if(beg_date):
         sql = sql.filter(Session.date >= beg_date)
     if(end_date):
@@ -117,7 +143,19 @@ async def bulk_upload_tester() -> json:
             table_data.extend(data)
 
 
+@router.post("/submit_ledger", response_model=List[PlayerData])
+async def submit_ledger(ledger: List[PlayerData]) -> json:
+    # print(ledger)
+    for item in ledger:
+        print(item)
+        if(item.player_id == '5CsKvXEd3O'):
+            continue
+        await update_user_stats(item.player_id, item.net, datetime.now().date())
+        await create_splitwise_expenses(item.player_id, item.net)
 
+
+
+#
 async def update_user_stats(id, winnings, date):
     winnings = float(winnings)
     current_profile = await profile.get_user_info(id)
@@ -150,9 +188,86 @@ async def update_user_stats(id, winnings, date):
         positive_percentage = (current_profile[0].get('number_of_sessions_positive') / total_sessions_played) * 100
         number_of_sessions_positive = current_profile[0].get('number_of_sessions_positive')
     
-    sql = update(Profile).values(all_time_total = all_time_total, biggest_win = biggest_win, biggest_loss = biggest_loss, date_of_biggest_win = date_of_biggest_win, date_of_biggest_loss = date_of_biggest_loss, average_all_time_win_or_loss = average_all_time_win_or_loss, positive_percentage = positive_percentage, negative_percentage = negative_percentage, number_of_sessions_positive = number_of_sessions_positive, number_of_sessions_negative = number_of_sessions_negative, total_sessions_played = total_sessions_played).where(Profile.id == id)
+    sql = update(Profile).values(all_time_total = all_time_total, biggest_win = biggest_win, biggest_loss = biggest_loss, date_of_biggest_win = date_of_biggest_win, date_of_biggest_loss = date_of_biggest_loss, average_all_time_win_or_loss = average_all_time_win_or_loss, positive_percentage = positive_percentage, negative_percentage = negative_percentage, number_of_sessions_positive = number_of_sessions_positive, number_of_sessions_negative = number_of_sessions_negative, total_sessions_played = total_sessions_played).where(Profile.pn_id == id)
     async with USERDATA_ENGINE.get_session() as session:
             session: AsyncSession = session
             async with session.begin():
                 await session.execute(sql)             
     return True
+
+
+async def create_splitwise_expenses(id, winnings):
+    print("id in create splitwise expenses")
+    print(id)
+    sw_id = await get_splitwise_id(id, winnings)
+    logger.info("sw_id: " + str(sw_id))
+    expense_data = {}
+    if(winnings > 0):
+        expense_data = {
+            "cost": str(winnings),
+            "description": 'Poke Winner',
+            "group_id": "63939034",
+            "split_equally": "false",
+            "users__0__user_id": "44365391",
+            "users__0__paid_share": 0,
+            "users__0__owed_share": str(winnings),
+            "users__1__user_id": sw_id,
+            "users__1__paid_share": str(winnings),
+            "users__1__owed_share": 0,
+        }
+    elif(winnings < 0):
+        expense_data = {
+            "cost": str(-1*winnings),
+            "description": 'Poke Loser',
+            "group_id": "63939034",
+            "split_equally": "false",
+            "users__0__user_id": "44365391",
+            "users__0__paid_share": str(-1*winnings),
+            "users__0__owed_share": 0,
+            "users__1__user_id": sw_id,
+            "users__1__paid_share": 0,
+            "users__1__owed_share": str(-1*winnings),
+        }
+
+    print(expense_data)
+
+    conn = http.client.HTTPSConnection(config.splitwise_create_expense_url)
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + config.splitwise_api_key,
+    }
+    print(headers)
+    
+    try:
+        conn.request("POST", "/api/v3.0/create_expense", body=json.dumps(expense_data), headers=headers)
+        response = conn.getresponse()
+        print("made it here")
+        print(response.read().decode())
+        if(response.status != 200):
+            print("inside status not 200")
+            logger.error(json.dumps({"error": f"Request failed with status {response.status}"}).encode())
+            return
+
+        data = response.read()
+        data = json.loads(data.decode('utf-8'))
+        print(data)
+        print("right after data")
+    except Exception as e:
+        return json.dumps({"error": str(e)}).encode(), 500
+    finally:
+        conn.close()
+
+    print(json.dumps(data).encode())
+    print("right after data.encode")
+
+
+async def get_splitwise_id(pn_id, winnings):
+    sql = select(Profile).where(Profile.pn_id == pn_id)
+    async with USERDATA_ENGINE.get_session() as session:
+            session: AsyncSession = session
+            async with session.begin():
+                result = await session.execute(sql)
+                data = result.scalars().first()
+
+            if(data):
+                return data.splitwise_id
