@@ -32,7 +32,8 @@ metadata = Base.metadata
 class Profile(Base):
     __tablename__ = "profile"
 
-    id = Column(INTEGER, primary_key=True, autoincrement=True)
+    google_client_id = Column(VARCHAR(256))
+    pn_id = Column(TINYTEXT, primary_key=True)
     name = Column(TINYTEXT)
     all_time_total = Column(FLOAT)
     biggest_win = Column(FLOAT)
@@ -51,9 +52,16 @@ class Session(Base):
     __tablename__ = "session"
 
     entry_number = Column(INTEGER, primary_key=True)
-    id = Column(INTEGER)
+    pn_id = Column(TINYTEXT)
     winnings = Column(FLOAT)
     buy_in_amount = Column(FLOAT)
     buy_out_amount = Column(FLOAT)
     location = Column(TINYTEXT)
     date = Column(DATE)
+
+
+class Leaderboard(Base):
+    __tablename__ = ""
+
+    pn_id = Column(TINYTEXT, primary_key=True)
+    
