@@ -11,8 +11,6 @@ jobs:
       - name: Set Up ENV
         run: |
           echo "${{ secrets.SQL_URI }}" > .env
-          echo "${{ secrets.SPLITWISE_API_KEY }}" > .env
-          echo "${{ secrets.SPLITWISE_CREATE_EXPENSE_URL }}" > .env
 
   deploy:
     runs-on: self-hosted
