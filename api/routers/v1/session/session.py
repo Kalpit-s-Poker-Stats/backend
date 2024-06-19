@@ -136,17 +136,30 @@ async def bulk_upload_tester() -> json:
 
 @router.post("/submit_ledger", response_model=List[PlayerData])
 async def submit_ledger(ledger: List[PlayerData]) -> json:
-    # print(ledger)
-    # validate_pn_ids(ledger)
+    incorrect_pn_id = await validate_pn_ids(ledger)
+    if (incorrect_pn_id != ""):
+        raise HTTPException(status_code=409, detail="User: " + incorrect_pn_id + " is not a registered player.")
     for item in ledger:
-        print(item)
         await update_user_stats(item.player_id, item.net, datetime.now().date())
         if(item.player_id == '5CsKvXEd3O'):
             continue
         await create_splitwise_expenses(item.player_id, item.net)
+    return {"message": f"Ledger Processed & Splitwise expenses created"}
 
 
-# async def validate_pn_ids(ledger: List[PlayerData]):
+async def validate_pn_ids(ledger: List[PlayerData]):
+    sql = select(Profile.pn_id)
+    async with USERDATA_ENGINE.get_session() as session:
+            session: AsyncSession = session
+            async with session.begin():
+                result = await session.execute(sql)
+
+    pn_ids = set(result.scalars().all())
+
+    for entry in ledger:
+        if entry.player_id not in pn_ids:
+            return entry.player_id
+    return ""
 
 
 
@@ -192,8 +205,6 @@ async def update_user_stats(id, winnings, date):
 
 
 async def create_splitwise_expenses(id, winnings):
-    print("id in create splitwise expenses")
-    print(id)
     sw_id = await get_splitwise_id(id, winnings)
     logger.info("sw_id: " + str(sw_id))
     expense_data = {}
@@ -224,36 +235,27 @@ async def create_splitwise_expenses(id, winnings):
             "users__1__owed_share": str(-1*winnings),
         }
 
-    print(expense_data)
-
     conn = http.client.HTTPSConnection(config.splitwise_url)
     headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + config.splitwise_api_key,
     }
-    print(headers)
     
     try:
         conn.request("POST", "/api/v3.0/create_expense", body=json.dumps(expense_data), headers=headers)
         response = conn.getresponse()
-        print("made it here")
-        print(response.read().decode())
         if(response.status != 200):
-            print("inside status not 200")
             logger.error(json.dumps({"error": f"Request failed with status {response.status}"}).encode())
             return
 
         data = response.read()
         data = json.loads(data.decode('utf-8'))
-        print(data)
-        print("right after data")
+
+
     except Exception as e:
         return json.dumps({"error": str(e)}).encode(), 500
     finally:
         conn.close()
-
-    print(json.dumps(data).encode())
-    print("right after data.encode")
 
 
 async def get_splitwise_id(pn_id, winnings):
