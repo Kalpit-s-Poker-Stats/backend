@@ -12,7 +12,7 @@ from api.database.functions import sqlalchemy_result
 
 from pydantic import BaseModel
 
-from api.models import LedgerModel
+from api.models.PlayerData import PlayerData
 
 from api.database.models import (
     Session,
@@ -39,15 +39,6 @@ router = APIRouter()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-class PlayerData(BaseModel):
-    player_nickname: str
-    player_id: str
-    session_start_at: Optional[datetime] = None
-    session_end_at: Optional[datetime] = None
-    buy_in: Optional[float] = None
-    stack: float
-    net: float
 
 class SessionEntry(BaseModel):
     id: int
@@ -146,12 +137,16 @@ async def bulk_upload_tester() -> json:
 @router.post("/submit_ledger", response_model=List[PlayerData])
 async def submit_ledger(ledger: List[PlayerData]) -> json:
     # print(ledger)
+    # validate_pn_ids(ledger)
     for item in ledger:
         print(item)
+        await update_user_stats(item.player_id, item.net, datetime.now().date())
         if(item.player_id == '5CsKvXEd3O'):
             continue
-        await update_user_stats(item.player_id, item.net, datetime.now().date())
         await create_splitwise_expenses(item.player_id, item.net)
+
+
+# async def validate_pn_ids(ledger: List[PlayerData]):
 
 
 
@@ -231,7 +226,7 @@ async def create_splitwise_expenses(id, winnings):
 
     print(expense_data)
 
-    conn = http.client.HTTPSConnection(config.splitwise_create_expense_url)
+    conn = http.client.HTTPSConnection(config.splitwise_url)
     headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + config.splitwise_api_key,

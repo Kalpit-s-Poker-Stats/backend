@@ -35,6 +35,7 @@ class Profile(Base):
     google_client_id = Column(VARCHAR(256))
     pn_id = Column(VARCHAR(256), primary_key=True)
     splitwise_id = Column(INTEGER)
+    discord_username = Column(VARCHAR(256))
     name = Column(TINYTEXT)
     all_time_total = Column(FLOAT)
     biggest_win = Column(FLOAT)

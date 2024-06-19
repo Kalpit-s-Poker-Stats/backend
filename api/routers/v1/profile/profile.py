@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.expression import select, insert, delete, update
+from sqlalchemy.exc import IntegrityError
 
 from api.database.database import USERDATA_ENGINE
 from api.database.functions import sqlalchemy_result
@@ -13,6 +14,10 @@ from api.database.models import (
 )
 
 from datetime import date
+import http.client
+from api import config
+import http.server
+from urllib.parse import urlparse, parse_qs
 
 router = APIRouter()
 
@@ -50,3 +55,65 @@ async def reset_user_stats(id):
                 data = await session.execute(sql)
 
     return 'User with id = ' + id + " has been reset."
+
+
+@router.put("/create_user_profile")
+async def create_user_profile(name, pn_id, splitwise_email, discord_username):
+    splitwise_id = await get_splitwise_id_from_splitwise(splitwise_email)
+    print(splitwise_id)
+    if(splitwise_id == None):
+        raise HTTPException(status_code=404, detail="User Could Not be Created because email is not assocaited with any splitwise account")
+    sql = insert(Profile).values(name = name, pn_id = pn_id, splitwise_id = splitwise_id, discord_username = discord_username, all_time_total = 0, biggest_win = 0, biggest_loss = 0, date_of_biggest_win = date(1000, 1, 1), date_of_biggest_loss = date(1000, 1, 1), average_all_time_win_or_loss = 0, positive_percentage = 0, negative_percentage = 0, number_of_sessions_positive = 0, number_of_sessions_negative = 0, total_sessions_played = 0)
+    try:
+        async with USERDATA_ENGINE.get_session() as session:
+                session: AsyncSession = session
+                async with session.begin():
+                    data = await session.execute(sql)
+
+        return 'User with id = ' + pn_id + " has been created."
+    except IntegrityError as e:
+        if "Duplicate entry" in str(e.orig):
+            raise HTTPException(status_code=409, detail="User not created because pn_id: " + pn_id + " exists in the DB already")
+        else:
+            raise HTTPException(status_code=400, detail="Generic Error from DB")
+    except HTTPException as e:
+        raise e 
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"detail": "Internal Server Error", "error": str(e)})
+
+
+
+async def get_splitwise_id_from_splitwise(splitwise_email):
+    conn = http.client.HTTPSConnection(config.splitwise_url)
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + config.splitwise_api_key,
+    }
+    print(headers)
+    
+    try:
+        conn.request("GET", "/api/v3.0/get_group/63939034", headers=headers)
+        response = conn.getresponse()
+
+        # print(response.read().decode())
+        if(response.status != 200):
+            print("inside status not 200")
+            logger.error(json.dumps({"error": f"Request failed with status {response.status}"}).encode())
+            return
+
+        data = response.read()
+        data = json.loads(data.decode('utf-8'))
+        print(data)
+        print("right after data")
+        return find_splitwise_id_from_members(data['group']['members'], splitwise_email)
+    except Exception as e:
+        return json.dumps({"error": str(e)}).encode(), 500
+    finally:
+        conn.close()
+
+
+def find_splitwise_id_from_members(data, email):
+    for item in data:
+        if item['email'] == email:
+            return item['id']
+    return None
