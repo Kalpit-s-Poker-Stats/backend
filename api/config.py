@@ -16,7 +16,10 @@ sql_uri = os.environ.get("sql_uri")
 splitwise_url = os.environ.get("splitwise_url")
 splitwise_api_key = os.environ.get("splitwise_api_key")
 
-print(f"Splitwise URL: {splitwise_url}")
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+logger.info(f"Splitwise URL: {splitwise_url}")
 
 
 # create application
