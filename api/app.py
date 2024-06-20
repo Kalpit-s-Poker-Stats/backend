@@ -10,7 +10,8 @@ from api.routers import (
 logger = logging.getLogger(__name__)
 
 origins = [
-    "http://135.148.121.103:4200", 
+    "http://135.148.121.103:4200",
+    "http://localhost:4200" 
 ]
 
 app.add_middleware(
