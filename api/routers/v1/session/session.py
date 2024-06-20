@@ -134,7 +134,7 @@ async def bulk_upload_tester() -> json:
             table_data.extend(data)
 
 
-@router.post("/submit_ledger", response_model=List[PlayerData])
+@router.post("/submit_ledger")
 async def submit_ledger(ledger: List[PlayerData]) -> json:
     incorrect_pn_id = await validate_pn_ids(ledger)
     if (incorrect_pn_id != ""):

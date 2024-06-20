@@ -1,6 +1,4 @@
 import api.middleware
-from fastapi import FastAPI 
-from fastapi.middleware.cors import CORSMiddleware
 import logging
 from api.config import app
 from api.routers import (
