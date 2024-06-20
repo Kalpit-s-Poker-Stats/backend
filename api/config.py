@@ -16,6 +16,9 @@ sql_uri = os.environ.get("sql_uri")
 splitwise_url = os.environ.get("splitwise_url")
 splitwise_api_key = os.environ.get("splitwise_api_key")
 
+print(f"Splitwise URL: {splitwise_url}")
+
+
 # create application
 app = FastAPI()
 
