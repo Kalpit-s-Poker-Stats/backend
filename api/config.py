@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # load environment variables
 load_dotenv(find_dotenv(), verbose=True)
 sql_uri = os.environ.get("sql_uri")
-splitwise_url = os.environ.get("splitwise_url")
+splitwise_url = os.environ.get("splitwise_api_url")
 splitwise_api_key = os.environ.get("splitwise_api_key")
 
 logging.basicConfig(level=logging.INFO)
