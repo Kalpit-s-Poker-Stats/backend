@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  backend_api_1:
+  api:
     build:
       context: .
       dockerfile: Dockerfile
@@ -12,3 +12,8 @@ services:
       - .env
     volumes:
       - /home/ubuntu/images:/code/images:rw
+    networks:
+      - backend_network  
+
+networks:
+  backend_network:
