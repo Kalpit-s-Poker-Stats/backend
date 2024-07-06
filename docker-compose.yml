@@ -18,3 +18,4 @@ services:
 networks:
   backend_network:
     name: backend_network
+    external: true
