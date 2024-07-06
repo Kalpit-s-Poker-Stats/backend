@@ -59,10 +59,10 @@ async def reset_user_stats(id):
     return 'User with id = ' + id + " has been reset."
 
 
-@router.put("/create_user_profile")
+@router.post("/create_user_profile")
 async def create_user_profile(userModel: UserCreate):
     splitwise_id = 1234567890
-    # splitwise_id = await get_splitwise_id_from_splitwise(userModel.splitwise_email)
+    splitwise_id = await get_splitwise_id_from_splitwise(userModel.splitwise_email)
     print(splitwise_id)
     if(splitwise_id == None):
         raise HTTPException(status_code=404, detail="User Could Not be Created because email is not assocaited with any splitwise account")
