@@ -33,6 +33,7 @@ class Profile(Base):
     __tablename__ = "profile"
 
     google_client_id = Column(VARCHAR(256))
+    creation_timestamp = Column(TIMESTAMP)
     pn_id = Column(VARCHAR(256), primary_key=True)
     splitwise_id = Column(INTEGER)
     discord_username = Column(VARCHAR(256))
@@ -48,6 +49,7 @@ class Profile(Base):
     number_of_sessions_positive = Column(INTEGER)
     number_of_sessions_negative = Column(INTEGER)
     total_sessions_played = Column(INTEGER)
+    acknowledgment_accepted = Column(INTEGER)
 
 
 class Session(Base):
