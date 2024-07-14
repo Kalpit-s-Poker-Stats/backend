@@ -11,6 +11,7 @@ from api.database.database import USERDATA_ENGINE
 from api.database.functions import sqlalchemy_result
 
 from pydantic import BaseModel
+from fastapi.responses import JSONResponse
 
 from api.models.PlayerData import PlayerData
 
@@ -77,7 +78,7 @@ async def entry(session_entry: SessionEntry):
             session: AsyncSession = session
             async with session.begin():
                 await session.execute(sql)
-    raise HTTPException(status_code = status.HTTP_201_CREATED, detail = "Session Added for id = " + session_entry.id)
+    return "Session Added for id = " + session_entry.id
 
 @router.get("/user_data")
 async def user_data(id, beg_date: Union[str, None] = None, end_date: Union[str, None] = None) -> json:
@@ -149,11 +150,10 @@ async def submit_ledger(ledger: List[PlayerData]) -> json:
             date=datetime.now().date()
         )
         await entry(session_entry)
-        # await update_user_stats(item.player_id, item.net, datetime.now().date())
         if(item.player_id == '5CsKvXEd3O'):
             continue
         await create_splitwise_expenses(item.player_id, item.net)
-    return {"message": f"Ledger Processed & Splitwise expenses created"}
+    return JSONResponse(status_code=200, content='Ledger Processed & Splitwise expenses created')
 
 
 async def validate_pn_ids(ledger: List[PlayerData]):

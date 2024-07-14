@@ -73,8 +73,7 @@ async def create_user_profile(userModel: UserCreate):
                 session: AsyncSession = session
                 async with session.begin():
                     data = await session.execute(sql)
-        raise JSONResponse(status_code=200, content='User with id = ' + userModel.pn_id + " has been created.")
-        return 'User with id = ' + userModel.pn_id + " has been created."
+        return JSONResponse(status_code=200, content='User with id = ' + userModel.pn_id + " has been created.")
     except IntegrityError as e:
         if "Duplicate entry" in str(e.orig):
             raise HTTPException(status_code=409, detail="User not created because pn_id: " + userModel.pn_id + " exists in the DB already")
