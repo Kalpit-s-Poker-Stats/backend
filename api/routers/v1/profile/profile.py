@@ -95,7 +95,7 @@ async def get_splitwise_id_from_splitwise(splitwise_email):
     print(headers)
     
     try:
-        conn.request("GET", "/api/v3.0/get_group/63939034", headers=headers)
+        conn.request("GET", "/api/v3.0/get_group/68143109", headers=headers)
         response = conn.getresponse()
 
         # print(response.read().decode())
