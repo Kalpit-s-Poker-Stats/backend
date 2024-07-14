@@ -41,12 +41,12 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class SessionEntry(BaseModel):
-    id: int
+    id: str
     winnings: float
     buy_in_amount: float
     buy_out_amount: float
     location: str
-    date: str
+    date: date
 
 
 @router.get("/full_session_table")
@@ -69,7 +69,7 @@ async def full_session_table() -> json:
 
 @router.post("/entry")
 async def entry(session_entry: SessionEntry):
-    sql = insert(Session).values(id = session_entry.id, winnings = session_entry.winnings, buy_in_amount = session_entry.buy_in_amount, buy_out_amount = session_entry.buy_out_amount, location = session_entry.location, date = session_entry.date)
+    sql = insert(Session).values(pn_id = session_entry.id, winnings = session_entry.winnings, buy_in_amount = session_entry.buy_in_amount, buy_out_amount = session_entry.buy_out_amount, location = session_entry.location, date = session_entry.date)
     current_profile = await update_user_stats(session_entry.id, session_entry.winnings, session_entry.date)
 
 
@@ -77,7 +77,7 @@ async def entry(session_entry: SessionEntry):
             session: AsyncSession = session
             async with session.begin():
                 await session.execute(sql)
-    raise HTTPException(status_code = status.HTTP_201_CREATED, detail = "Session Added for id = " + str(session_entry.id))
+    raise HTTPException(status_code = status.HTTP_201_CREATED, detail = "Session Added for id = " + session_entry.id)
 
 @router.get("/user_data")
 async def user_data(id, beg_date: Union[str, None] = None, end_date: Union[str, None] = None) -> json:
@@ -140,7 +140,16 @@ async def submit_ledger(ledger: List[PlayerData]) -> json:
     if (incorrect_pn_id != ""):
         raise HTTPException(status_code=409, detail="User: " + incorrect_pn_id + " is not a registered player.")
     for item in ledger:
-        await update_user_stats(item.player_id, item.net, datetime.now().date())
+        session_entry = SessionEntry(
+            id=str(item.player_id),
+            winnings=item.net,
+            buy_in_amount=item.buy_in,
+            buy_out_amount=0,
+            location="online",
+            date=datetime.now().date()
+        )
+        await entry(session_entry)
+        # await update_user_stats(item.player_id, item.net, datetime.now().date())
         if(item.player_id == '5CsKvXEd3O'):
             continue
         await create_splitwise_expenses(item.player_id, item.net)
@@ -160,7 +169,6 @@ async def validate_pn_ids(ledger: List[PlayerData]):
         if entry.player_id not in pn_ids:
             return entry.player_id
     return ""
-
 
 
 #

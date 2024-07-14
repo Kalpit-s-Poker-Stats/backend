@@ -55,12 +55,13 @@ class Profile(Base):
 class Session(Base):
     __tablename__ = "session"
 
-    entry_number = Column(INTEGER, primary_key=True)
+    entry_number = Column(INTEGER, primary_key=True, autoincrement=True)
+    date_entered = Column(TIMESTAMP)
     pn_id = Column(TINYTEXT)
     winnings = Column(FLOAT)
     buy_in_amount = Column(FLOAT)
     buy_out_amount = Column(FLOAT)
-    location = Column(TINYTEXT)
+    location = Column(VARCHAR(256))
     date = Column(DATE)
 
 

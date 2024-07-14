@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.expression import select, insert, delete, update
 from sqlalchemy.exc import IntegrityError
+from fastapi.responses import JSONResponse
 
 from api.database.database import USERDATA_ENGINE
 from api.database.functions import sqlalchemy_result
@@ -72,7 +73,7 @@ async def create_user_profile(userModel: UserCreate):
                 session: AsyncSession = session
                 async with session.begin():
                     data = await session.execute(sql)
-
+        raise JSONResponse(status_code=200, content='User with id = ' + userModel.pn_id + " has been created.")
         return 'User with id = ' + userModel.pn_id + " has been created."
     except IntegrityError as e:
         if "Duplicate entry" in str(e.orig):
