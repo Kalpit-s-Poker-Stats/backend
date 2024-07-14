@@ -220,7 +220,7 @@ async def create_splitwise_expenses(id, winnings):
         expense_data = {
             "cost": str(winnings),
             "description": 'Poke Winner',
-            "group_id": "63939034",
+            "group_id": "68143109",
             "split_equally": "false",
             "users__0__user_id": "44365391",
             "users__0__paid_share": 0,
@@ -233,7 +233,7 @@ async def create_splitwise_expenses(id, winnings):
         expense_data = {
             "cost": str(-1*winnings),
             "description": 'Poke Loser',
-            "group_id": "63939034",
+            "group_id": "68143109",
             "split_equally": "false",
             "users__0__user_id": "44365391",
             "users__0__paid_share": str(-1*winnings),
