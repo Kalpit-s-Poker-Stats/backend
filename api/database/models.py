@@ -34,6 +34,7 @@ class Profile(Base):
 
     google_client_id = Column(VARCHAR(256))
     creation_timestamp = Column(TIMESTAMP)
+    last_updated_timestamp = Column(TIMESTAMP)
     pn_id = Column(VARCHAR(256), primary_key=True)
     splitwise_id = Column(INTEGER)
     discord_username = Column(VARCHAR(256))

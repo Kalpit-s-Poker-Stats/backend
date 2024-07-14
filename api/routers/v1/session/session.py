@@ -204,7 +204,7 @@ async def update_user_stats(id, winnings, date):
         positive_percentage = (current_profile[0].get('number_of_sessions_positive') / total_sessions_played) * 100
         number_of_sessions_positive = current_profile[0].get('number_of_sessions_positive')
     
-    sql = update(Profile).values(all_time_total = all_time_total, biggest_win = biggest_win, biggest_loss = biggest_loss, date_of_biggest_win = date_of_biggest_win, date_of_biggest_loss = date_of_biggest_loss, average_all_time_win_or_loss = average_all_time_win_or_loss, positive_percentage = positive_percentage, negative_percentage = negative_percentage, number_of_sessions_positive = number_of_sessions_positive, number_of_sessions_negative = number_of_sessions_negative, total_sessions_played = total_sessions_played).where(Profile.pn_id == id)
+    sql = update(Profile).values(last_updated_timestamp = datetime.now(), all_time_total = all_time_total, biggest_win = biggest_win, biggest_loss = biggest_loss, date_of_biggest_win = date_of_biggest_win, date_of_biggest_loss = date_of_biggest_loss, average_all_time_win_or_loss = average_all_time_win_or_loss, positive_percentage = positive_percentage, negative_percentage = negative_percentage, number_of_sessions_positive = number_of_sessions_positive, number_of_sessions_negative = number_of_sessions_negative, total_sessions_played = total_sessions_played).where(Profile.pn_id == id)
     async with USERDATA_ENGINE.get_session() as session:
             session: AsyncSession = session
             async with session.begin():
@@ -214,7 +214,7 @@ async def update_user_stats(id, winnings, date):
 
 async def create_splitwise_expenses(id, winnings):
     sw_id = await get_splitwise_id(id, winnings)
-    logger.info("sw_id: " + str(sw_id))
+    logger.info("Adding Splitwise expense with sw_id: " + str(sw_id))
     expense_data = {}
     if(winnings > 0):
         expense_data = {
