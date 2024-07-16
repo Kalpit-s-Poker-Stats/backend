@@ -2,6 +2,7 @@ import json
 from datetime import date
 
 from fastapi import APIRouter, HTTPException, status
+from fastapi.responses import FileResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.expression import select, insert, delete, update
@@ -14,6 +15,8 @@ from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 
 from api.models.PlayerData import PlayerData
+
+import os
 
 from api.database.models import (
     Session,
@@ -140,21 +143,40 @@ async def submit_ledger(ledger: List[PlayerData]) -> json:
     incorrect_pn_id = await validate_pn_ids(ledger)
     if (incorrect_pn_id != ""):
         raise HTTPException(status_code=409, detail="User: " + incorrect_pn_id + " is not a registered player.")
-    for item in ledger:
-        session_entry = SessionEntry(
-            id=str(item.player_id),
-            winnings=item.net,
-            buy_in_amount=item.buy_in,
-            buy_out_amount=0,
-            location="online",
-            date=datetime.now().date()
-        )
-        await entry(session_entry)
-        if(item.player_id == '5CsKvXEd3O'):
-            continue
-        await create_splitwise_expenses(item.player_id, item.net)
-    return JSONResponse(status_code=200, content='Ledger Processed & Splitwise expenses created')
+    file_path = f"/tmp/discord_update_info_" + str(datetime.now().date()) + ".txt"
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    with open(file_path, "w") as file:
+        for item in ledger:
+            discord_username = await get_discord_username(item.player_id)
+            session_entry = SessionEntry(
+                id=str(item.player_id),
+                winnings=item.net,
+                buy_in_amount=item.buy_in,
+                buy_out_amount=0,
+                location="online",
+                date=datetime.now().date()
+            )
+            if(item.net > 0):
+                file.write(f"/admin-chips remove member: @{discord_username} quantity: {item.net}\n")
+            else:
+                file.write(f"/admin-chips add member: @{discord_username} quantity: {item.net*-1}\n")
+            await entry(session_entry)
+            if(item.player_id == '5CsKvXEd3O'):
+                continue
+            await create_splitwise_expenses(item.player_id, item.net)
+    # return JSONResponse(status_code=200, content='Ledger Processed & Splitwise expenses created')
+    return FileResponse(file_path, filename=f"discord_update_info_{datetime.now().date()}.txt", media_type='text/plain')
 
+async def get_discord_username(pn_id):
+    sql = select(Profile.discord_username).where(Profile.pn_id == pn_id)
+    async with USERDATA_ENGINE.get_session() as session:
+            session: AsyncSession = session
+            async with session.begin():
+                result = await session.execute(sql)
+
+    result = result.scalar_one_or_none()
+
+    return result
 
 async def validate_pn_ids(ledger: List[PlayerData]):
     sql = select(Profile.pn_id)
@@ -220,7 +242,7 @@ async def create_splitwise_expenses(id, winnings):
         expense_data = {
             "cost": str(winnings),
             "description": 'Poke Winner',
-            "group_id": "68143109",
+            "group_id": "63939034",
             "split_equally": "false",
             "users__0__user_id": "44365391",
             "users__0__paid_share": 0,
@@ -233,7 +255,7 @@ async def create_splitwise_expenses(id, winnings):
         expense_data = {
             "cost": str(-1*winnings),
             "description": 'Poke Loser',
-            "group_id": "68143109",
+            "group_id": "63939034",
             "split_equally": "false",
             "users__0__user_id": "44365391",
             "users__0__paid_share": str(-1*winnings),
