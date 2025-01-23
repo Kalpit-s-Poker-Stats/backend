@@ -38,6 +38,7 @@ from typing import List, Optional
 
 
 import logging
+import hashlib
 
 router = APIRouter()
 
@@ -46,6 +47,7 @@ logger = logging.getLogger(__name__)
 
 class SessionEntry(BaseModel):
     id: str
+    hashId: str
     winnings: float
     buy_in_amount: float
     buy_out_amount: float
@@ -73,7 +75,7 @@ async def full_session_table() -> json:
 
 @router.post("/entry")
 async def entry(session_entry: SessionEntry):
-    sql = insert(Session).values(pn_id = session_entry.id, winnings = session_entry.winnings, buy_in_amount = session_entry.buy_in_amount, buy_out_amount = session_entry.buy_out_amount, location = session_entry.location, date = session_entry.date)
+    sql = insert(Session).values(pn_id = session_entry.id, hashId = session_entry.hashId, winnings = session_entry.winnings, buy_in_amount = session_entry.buy_in_amount, buy_out_amount = session_entry.buy_out_amount, location = session_entry.location, date = session_entry.date)
     current_profile = await update_user_stats(session_entry.id, session_entry.winnings, session_entry.date)
 
 
@@ -147,9 +149,13 @@ async def submit_ledger(ledger: List[PlayerData]) -> json:
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
     with open(file_path, "w") as file:
         for item in ledger:
+            hash_id = hashlib.sha256(str(item.session_start_at).encode()).hexdigest()
+            if(await validate_entry(hash_id)):
+                raise HTTPException(status_code=409, detail="Entry has been submitted before: " + hash_id)
             discord_username = await get_discord_username(item.player_id)
             session_entry = SessionEntry(
                 id=str(item.player_id),
+                hashId=hash_id,
                 winnings=item.net,
                 buy_in_amount=item.buy_in,
                 buy_out_amount=0,
@@ -193,7 +199,19 @@ async def validate_pn_ids(ledger: List[PlayerData]):
     return ""
 
 
-#
+async def validate_entry(hash_id: str):
+    sql = select(Session).where(Session.hashId == hash_id)
+    async with USERDATA_ENGINE.get_session() as session:
+        session: AsyncSession = session
+        async with session.begin():
+            # Execute the query to check if hashId exists
+            result = await session.execute(sql)
+            data = sqlalchemy_result(result)
+            data = data.rows2dict()
+            
+    return data
+        
+
 async def update_user_stats(id, winnings, date):
     winnings = float(winnings)
     current_profile = await profile.get_user_info(id)

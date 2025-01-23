@@ -57,6 +57,7 @@ class Session(Base):
     __tablename__ = "session"
 
     entry_number = Column(INTEGER, primary_key=True, autoincrement=True)
+    hashId = Column(VARCHAR(250))
     date_entered = Column(TIMESTAMP)
     pn_id = Column(TINYTEXT)
     winnings = Column(FLOAT)
