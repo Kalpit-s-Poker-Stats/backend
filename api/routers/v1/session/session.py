@@ -210,7 +210,74 @@ async def validate_entry(hash_id: str):
             data = data.rows2dict()
             
     return data
-        
+
+
+@router.post("/recalculate")
+async def recalculate() -> json:
+    pn_ids = await profile.get_all_pn_ids()
+    for pn_id in pn_ids:
+        await Profile.reset_user_stats(pn_id)
+        await recalculate_helper(pn_id)
+
+
+async def recalculate_helper(pn_id: str) -> dict:
+    sql = select(Session).where(Session.pn_id == pn_id)
+    async with USERDATA_ENGINE.get_session() as session:
+            session: AsyncSession = session
+            async with session.begin():
+                result = await session.execute(sql)
+
+    sessions = [
+        {column.name: getattr(row, column.name) for column in Session.__table__.columns}
+        for row in result.scalars()
+    ]
+
+
+    total_sessions_played = 0
+    all_time_total = 0
+    average_all_time_win_or_loss = 0
+    biggest_win = 0
+    date_of_biggest_win = 0
+    biggest_loss = 0
+    date_of_biggest_loss = 0
+    number_of_sessions_positive = 0
+    positive_percentage = 0
+    negative_percentage = 0
+    number_of_sessions_negative = 0
+   
+    for session in sessions:
+        winnings = session.get("winnings")
+        winnings = float(winnings)
+        date = session.get("date")
+
+        total_sessions_played = total_sessions_played + 1
+        all_time_total = float(all_time_total) + winnings
+        average_all_time_win_or_loss = all_time_total / total_sessions_played
+
+        if (biggest_win < winnings):
+            biggest_win = winnings
+            date_of_biggest_win = date
+        elif(biggest_loss > winnings):
+            biggest_loss = winnings
+            date_of_biggest_loss = date
+
+        if(winnings >= 0):
+            number_of_sessions_positive += 1
+            positive_percentage = (number_of_sessions_positive / total_sessions_played) * 100
+            negative_percentage = (number_of_sessions_negative / total_sessions_played) * 100
+        if(winnings < 0):
+            number_of_sessions_negative += 1
+            negative_percentage = (number_of_sessions_negative / total_sessions_played) * 100
+            positive_percentage = (number_of_sessions_positive / total_sessions_played) * 100
+
+    sql = update(Profile).values(last_updated_timestamp = datetime.now(), all_time_total = all_time_total, biggest_win = biggest_win, biggest_loss = biggest_loss, date_of_biggest_win = date_of_biggest_win, date_of_biggest_loss = date_of_biggest_loss, average_all_time_win_or_loss = average_all_time_win_or_loss, positive_percentage = positive_percentage, negative_percentage = negative_percentage, number_of_sessions_positive = number_of_sessions_positive, number_of_sessions_negative = number_of_sessions_negative, total_sessions_played = total_sessions_played).where(Profile.pn_id == id)
+    async with USERDATA_ENGINE.get_session() as session:
+            session: AsyncSession = session
+            async with session.begin():
+                await session.execute(sql)             
+    return True
+    
+
 
 async def update_user_stats(id, winnings, date):
     winnings = float(winnings)

@@ -47,6 +47,18 @@ async def get_user_info(id):
         raise HTTPException(detail = "Profile not found")
     return data
 
+
+async def get_all_pn_ids() -> list:
+    sql = select(Profile.pn_id)
+    async with USERDATA_ENGINE.get_session() as session:
+        session: AsyncSession = session
+        async with session.begin():
+            data = await session.execute(sql)
+    
+    pn_ids = list(data.scalars())
+    return pn_ids
+
+
 # TODO: update query to add in values for the updated columns in profile table
 @router.put("/reset_user_stats")
 async def reset_user_stats(id):
