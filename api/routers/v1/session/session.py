@@ -220,7 +220,7 @@ async def recalculate() -> json:
         await recalculate_helper(pn_id)
 
 
-async def recalculate_helper(pn_id: str) -> dict:
+async def recalculate_helper(pn_id) -> dict:
     sql = select(Session).where(Session.pn_id == pn_id)
     async with USERDATA_ENGINE.get_session() as session:
             session: AsyncSession = session
@@ -269,6 +269,18 @@ async def recalculate_helper(pn_id: str) -> dict:
             number_of_sessions_negative += 1
             negative_percentage = (number_of_sessions_negative / total_sessions_played) * 100
             positive_percentage = (number_of_sessions_positive / total_sessions_played) * 100
+
+    print(f"Total Sessions Played: {total_sessions_played}")
+    print(f"All-Time Total: {all_time_total}")
+    print(f"Average All-Time Win/Loss: {average_all_time_win_or_loss}")
+    print(f"Biggest Win: {biggest_win}")
+    print(f"Date of Biggest Win: {date_of_biggest_win}")
+    print(f"Biggest Loss: {biggest_loss}")
+    print(f"Date of Biggest Loss: {date_of_biggest_loss}")
+    print(f"Number of Positive Sessions: {number_of_sessions_positive}")
+    print(f"Positive Percentage: {positive_percentage}%")
+    print(f"Negative Percentage: {negative_percentage}%")
+    print(f"Number of Negative Sessions: {number_of_sessions_negative}")
 
     sql = update(Profile).values(last_updated_timestamp = datetime.now(), all_time_total = all_time_total, biggest_win = biggest_win, biggest_loss = biggest_loss, date_of_biggest_win = date_of_biggest_win, date_of_biggest_loss = date_of_biggest_loss, average_all_time_win_or_loss = average_all_time_win_or_loss, positive_percentage = positive_percentage, negative_percentage = negative_percentage, number_of_sessions_positive = number_of_sessions_positive, number_of_sessions_negative = number_of_sessions_negative, total_sessions_played = total_sessions_played).where(Profile.pn_id == id)
     async with USERDATA_ENGINE.get_session() as session:
