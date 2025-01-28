@@ -237,9 +237,9 @@ async def recalculate_helper(pn_id: str) -> dict:
     all_time_total = 0
     average_all_time_win_or_loss = 0
     biggest_win = 0
-    date_of_biggest_win = 0
+    date_of_biggest_win = None
     biggest_loss = 0
-    date_of_biggest_loss = 0
+    date_of_biggest_loss = None
     number_of_sessions_positive = 0
     positive_percentage = 0
     negative_percentage = 0
@@ -251,7 +251,7 @@ async def recalculate_helper(pn_id: str) -> dict:
         date = session.get("date")
 
         total_sessions_played = total_sessions_played + 1
-        all_time_total += winnings
+        all_time_total = float(all_time_total) + winnings
         average_all_time_win_or_loss = all_time_total / total_sessions_played
 
         if (biggest_win < winnings):
