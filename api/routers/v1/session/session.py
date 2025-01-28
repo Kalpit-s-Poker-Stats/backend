@@ -216,7 +216,7 @@ async def validate_entry(hash_id: str):
 async def recalculate() -> json:
     pn_ids = await profile.get_all_pn_ids()
     for pn_id in pn_ids:
-        await Profile.reset_user_stats(pn_id)
+        await profile.reset_user_stats(pn_id)
         await recalculate_helper(pn_id)
 
 
