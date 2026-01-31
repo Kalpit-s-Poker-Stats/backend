@@ -13,6 +13,9 @@ jobs:
           echo "${{ secrets.SQL_URI }}" >> .env
           echo "${{ secrets.SPLITWISE_API_KEY }}" >> .env
           echo "${{ secrets.SPLITWISE_API_URL }}" >> .env
+          echo "${{ secrets.DISCORD_CLIENT_ID }}" >> .env
+          echo "${{ secrets.DISCORD_CLIENT_SECRET }}" >> .env
+          echo "${{ secrets.DISCORD_REDIRECT_URI }}" >> .env
 
   deploy:
     runs-on: self-hosted

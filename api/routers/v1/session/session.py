@@ -67,9 +67,9 @@ async def full_session_table() -> json:
     data = data.rows2dict()
     response = dict()
     for value in data:
-        idx = value['id']
+        idx = value['entry_number']
         response[idx] = value
-   
+
     return response
 
 
