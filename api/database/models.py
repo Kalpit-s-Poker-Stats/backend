@@ -32,7 +32,7 @@ metadata = Base.metadata
 class Profile(Base):
     __tablename__ = "profile"
 
-    google_client_id = Column(VARCHAR(256))
+    discord_id = Column(VARCHAR(256))
     creation_timestamp = Column(TIMESTAMP)
     last_updated_timestamp = Column(TIMESTAMP)
     pn_id = Column(VARCHAR(256), primary_key=True)

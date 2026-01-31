@@ -16,11 +16,13 @@ sql_uri = os.environ.get("sql_uri")
 splitwise_url = os.environ.get("splitwise_api_url")
 splitwise_api_key = os.environ.get("splitwise_api_key")
 
+# Discord OAuth configuration
+discord_client_id = os.environ.get("DISCORD_CLIENT_ID")
+discord_client_secret = os.environ.get("DISCORD_CLIENT_SECRET")
+discord_redirect_uri = os.environ.get("DISCORD_REDIRECT_URI")
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-logger.info(f"Splitwise URL: {splitwise_url}")
-
 
 # create application
 app = FastAPI()
