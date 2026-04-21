@@ -73,13 +73,14 @@ async def discord_auth(request: DiscordAuthRequest):
                 }
             )
         else:
-            # User not found - return Discord info without creating account
+            # User not found - return Discord info so frontend can redirect to signup
             raise HTTPException(
                 status_code=404,
                 detail={
                     "error": "user_not_found",
-                    "message": f"No account found for Discord user '{discord_username}'. Please contact an admin to link your account.",
-                    "discord_username": discord_username
+                    "message": f"No account found for Discord user '{discord_username}'. Please complete your profile to join.",
+                    "discord_username": discord_username,
+                    "discord_id": discord_id
                 }
             )
 
