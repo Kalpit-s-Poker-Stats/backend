@@ -79,20 +79,47 @@ async def create_user_profile(userModel: UserCreate):
     print(splitwise_id)
     if(splitwise_id == None):
         raise HTTPException(status_code=404, detail="User Could Not be Created because email is not assocaited with any splitwise account")
-    sql = insert(Profile).values(name = userModel.name, pn_id = userModel.pn_id, splitwise_id = splitwise_id, discord_username = userModel.discord_username, all_time_total = 0, biggest_win = 0, biggest_loss = 0, date_of_biggest_win = date(1000, 1, 1), date_of_biggest_loss = date(1000, 1, 1), average_all_time_win_or_loss = 0, positive_percentage = 0, negative_percentage = 0, number_of_sessions_positive = 0, number_of_sessions_negative = 0, total_sessions_played = 0, acknowledgment_accepted = userModel.acknowledgment)
+    sql = insert(Profile).values(
+        name = userModel.name,
+        pn_id = userModel.pn_id,
+        splitwise_id = splitwise_id,
+        discord_username = userModel.discord_username,
+        discord_id = userModel.discord_id,
+        all_time_total = 0,
+        biggest_win = 0,
+        biggest_loss = 0,
+        date_of_biggest_win = date(1000, 1, 1),
+        date_of_biggest_loss = date(1000, 1, 1),
+        average_all_time_win_or_loss = 0,
+        positive_percentage = 0,
+        negative_percentage = 0,
+        number_of_sessions_positive = 0,
+        number_of_sessions_negative = 0,
+        total_sessions_played = 0,
+        acknowledgment_accepted = userModel.acknowledgment
+    )
     try:
         async with USERDATA_ENGINE.get_session() as session:
                 session: AsyncSession = session
                 async with session.begin():
                     data = await session.execute(sql)
-        return JSONResponse(status_code=200, content='User with id = ' + userModel.pn_id + " has been created.")
+        # Return user object for frontend to log in the user
+        return JSONResponse(status_code=200, content={
+            "message": f"User with id = {userModel.pn_id} has been created.",
+            "user": {
+                "pn_id": userModel.pn_id,
+                "name": userModel.name,
+                "discord_id": userModel.discord_id,
+                "discord_username": userModel.discord_username
+            }
+        })
     except IntegrityError as e:
         if "Duplicate entry" in str(e.orig):
             raise HTTPException(status_code=409, detail="User not created because pn_id: " + userModel.pn_id + " exists in the DB already")
         else:
             raise HTTPException(status_code=400, detail="Generic Error from DB")
     except HTTPException as e:
-        raise e 
+        raise e
     except Exception as e:
         return JSONResponse(status_code=500, content={"detail": "Internal Server Error", "error": str(e)})
 
