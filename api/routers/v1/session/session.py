@@ -85,6 +85,83 @@ async def entry(session_entry: SessionEntry):
                 await session.execute(sql)
     return "Session Added for id = " + session_entry.id
 
+@router.get("/stats")
+async def session_stats(pn_id: str, beg_date: Optional[str] = None, end_date: Optional[str] = None):
+    sql = select(Session).where(Session.pn_id == pn_id)
+    if beg_date:
+        sql = sql.filter(Session.date >= beg_date)
+    if end_date:
+        sql = sql.filter(Session.date <= end_date)
+
+    async with USERDATA_ENGINE.get_session() as session:
+        session: AsyncSession = session
+        async with session.begin():
+            data = await session.execute(sql)
+
+    rows = sqlalchemy_result(data).rows2dict()
+
+    total_pnl = 0.0
+    total_buy_in = 0.0
+    sessions_won = 0
+    sessions_lost = 0
+    biggest_win = 0.0
+    biggest_loss = 0.0
+    date_of_biggest_win = None
+    date_of_biggest_loss = None
+
+    for row in rows:
+        w = float(row.get("winnings", 0))
+        b = float(row.get("buy_in_amount", 0))
+        d = str(row.get("date", ""))
+        total_pnl += w
+        total_buy_in += b
+        if w >= 0:
+            sessions_won += 1
+            if w > biggest_win:
+                biggest_win = w
+                date_of_biggest_win = d
+        else:
+            sessions_lost += 1
+            if w < biggest_loss:
+                biggest_loss = w
+                date_of_biggest_loss = d
+
+    total_sessions = len(rows)
+    average_pnl = total_pnl / total_sessions if total_sessions > 0 else 0.0
+    win_rate = (sessions_won / total_sessions * 100) if total_sessions > 0 else 0.0
+    roi = (total_pnl / total_buy_in * 100) if total_buy_in > 0 else 0.0
+
+    r2 = lambda v: round(v, 2)
+
+    sessions_out = [
+        {
+            "date": str(row.get("date", "")),
+            "buy_in_amount": r2(float(row.get("buy_in_amount", 0))),
+            "buy_out_amount": r2(float(row.get("buy_out_amount", 0))),
+            "winnings": r2(float(row.get("winnings", 0))),
+        }
+        for row in rows
+    ]
+
+    return {
+        "sessions": sessions_out,
+        "stats": {
+            "total_pnl": r2(total_pnl),
+            "average_pnl": r2(average_pnl),
+            "biggest_win": r2(biggest_win),
+            "date_of_biggest_win": date_of_biggest_win,
+            "biggest_loss": r2(biggest_loss),
+            "date_of_biggest_loss": date_of_biggest_loss,
+            "win_rate": r2(win_rate),
+            "sessions_won": sessions_won,
+            "sessions_lost": sessions_lost,
+            "total_sessions": total_sessions,
+            "total_buy_in": r2(total_buy_in),
+            "roi": roi,
+        },
+    }
+
+
 @router.get("/user_data")
 async def user_data(id, beg_date: Union[str, None] = None, end_date: Union[str, None] = None) -> json:
     current_date = date.today()
