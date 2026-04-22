@@ -88,7 +88,7 @@ async def entry(session_entry: SessionEntry):
 @router.get("/user_data")
 async def user_data(id, beg_date: Union[str, None] = None, end_date: Union[str, None] = None) -> json:
     current_date = date.today()
-    sql = select(Session).where(Session.id == id)
+    sql = select(Session).where(Session.pn_id == id)
     sql2 = select(Profile).where(Profile.pn_id == id)
     if(beg_date):
         sql = sql.filter(Session.date >= beg_date)
